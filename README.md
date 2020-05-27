@@ -133,5 +133,111 @@ gem 'pg_search', '~> 2.3.0'
 
 ```
 
+Install Stimulus JS
 
+```
+yarn add stimulus
+```
+
+
+```javascript
+// javascript/packs/application.js
+import { Application } from "stimulus"
+import { definitionsFromContext } from "stimulus/webpack-helpers"
+const application = Application.start()
+const context = require.context("../controllers", true, /\.js$/)
+application.load(definitionsFromContext(context))
+```
+
+
+```javascript
+// javascript/controllers/search_controller.js
+import { Controller } from "stimulus";
+
+export default class extends Controller {
+  static targets = [ "input" ]
+
+  connect() {
+
+  }
+  updateResults() {
+  }
+}
+```
+
+Lets add stimulus controller, target and action to the html.
+
+We can also put the search results in a partial.
+
+```html
+<!-- views/flats/index.html.erb -->
+<div class="container" data-controller="search">
+  <div class="row">
+    <div class="col-sm-8 offset-sm-2">
+      <%= form_tag flats_path, method: :get do %>
+        <%= text_field_tag :query,
+          params[:query],
+          class: "form-control",
+          placeholder: "Find a Flat", data: {target: "search.input", action: "keyup->search#updateResults"} %>
+      <% end %>
+      <div id="flats">
+        <%=render "list", flats: @flats%>
+      </div>
+    </div>
+  </div>
+</div>
+
+```
+
+
+```javascript
+// javascript/controllers/search_controller.js
+ updateResults() {
+    const searchInput = this.inputTarget.value
+    $.ajax({
+      url: "/search_results",
+      method: "POST",
+      data: {
+        query:  searchInput
+      }
+    });
+  }
+```
+
+```ruby
+  #routes.rb
+  post "search_results", to: "flats#search_results"
+```
+
+
+
+```ruby
+#controllers/flats_controller.rb
+def search_results
+  @flats = Flat.search_by_name_and_description(params[:query])
+  respond_to do |format|
+    format.js
+  end
+end
+```
+
+```javascript
+// javascript/controllers/search_controller.js
+ updateResults() {
+    const searchInput = this.inputTarget.value
+    $.ajax({
+      url: "/search_results",
+      method: "POST",
+      data: {
+        query:  searchInput
+      }
+    });
+  }
+```
+
+```javascript
+// views/flats/search_results.js.erb
+document.getElementById('flats').innerHTML = "<%= j render partial: 'list', products: @flats %>";
+
+```
 

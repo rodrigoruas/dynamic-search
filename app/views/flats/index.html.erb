@@ -1,18 +1,14 @@
-<div class="container">
+<div class="container" data-controller="search">
   <div class="row">
     <div class="col-sm-8 offset-sm-2">
       <%= form_tag flats_path, method: :get do %>
         <%= text_field_tag :query,
           params[:query],
           class: "form-control",
-          placeholder: "Find a Flat"%>
-        <%= submit_tag "Search", class: "btn btn-primary" %>
+          placeholder: "Find a Flat", data: {target: "search.input", action: "keyup->search#updateResults"} %>
       <% end %>
       <div id="flats">
-        <% @flats.each do |flat| %>
-          <h4><%= flat.name %></h4>
-          <p><%= flat.description %></p>
-        <% end %>
+        <%=render "list", flats: @flats%>
       </div>
     </div>
   </div>
