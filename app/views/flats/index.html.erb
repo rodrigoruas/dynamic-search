@@ -1,0 +1,19 @@
+<div class="container">
+  <div class="row">
+    <div class="col-sm-8 offset-sm-2">
+      <%= form_tag flats_path, method: :get do %>
+        <%= text_field_tag :query,
+          params[:query],
+          class: "form-control",
+          placeholder: "Find a Flat"%>
+        <%= submit_tag "Search", class: "btn btn-primary" %>
+      <% end %>
+      <div id="flats">
+        <% @flats.each do |flat| %>
+          <h4><%= flat.name %></h4>
+          <p><%= flat.description %></p>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>
