@@ -1,10 +1,6 @@
 # Create Rails App
 
 
-### Create Rails App :
-
-root `Inapp`, `form_controller.js` will make a POST request to set the `start_inapp` attribute for the `MultiInapp`:
-
 ```
 rails new \                        
   --database postgresql \
@@ -62,16 +58,12 @@ Creating a Flat model with name and description as strings.
 
 Let's create some seeds using Faker gem. 
 
-
-
 ```ruby
 #Gemfile:
 
 gem "faker"
 
 ```
-
-
 ```
 bundle install
 ```
@@ -86,11 +78,13 @@ require 'faker'
 end
 
 ```
-
+To run our seeds:
 
 ```
 rails db:seed
 ```
+
+Creating the flats controller with only the index action:
 
 ```
 rails g controller flats index
@@ -114,7 +108,7 @@ class FlatsController < ApplicationController
 end
 ```
 
-Lets install pg_search gem
+Lets install `pg_search` gem to perform our searches.
 
 ```
 # Gemfile
@@ -139,7 +133,8 @@ Install Stimulus JS
 yarn add stimulus
 ```
 
-
+This is the basic stimulus configuration. It will load every js file placed inside `controllers` folder.
+ 
 ```javascript
 // javascript/packs/application.js
 import { Application } from "stimulus"
@@ -148,6 +143,8 @@ const application = Application.start()
 const context = require.context("../controllers", true, /\.js$/)
 application.load(definitionsFromContext(context))
 ```
+
+Lets create our js file. `updateResults()` will be a function called everytime users types anything in the search field. It's empty for now.
 
 
 ```javascript
@@ -165,9 +162,12 @@ export default class extends Controller {
 }
 ```
 
-Lets add stimulus controller, target and action to the html.
+We need to add stimulus selectors to the html.
 
-We can also put the search results in a partial.
+`data-controller="search"` indicates that our html will be communicating with `search_controller.js` 
+`data-target="search.input"` indicates that the element will be called `input` in stimulus. It's like a variable.
+`data-action="keyup->searcg#updateResults"` indicates that everytime the `keyup` event happens, `updateResults` function will be called.
+
 
 ```html
 <!-- views/flats/index.html.erb -->
@@ -189,6 +189,18 @@ We can also put the search results in a partial.
 
 ```
 
+We can also put the search results in a partial to make our job easier.
+
+```html
+<!-- views/flats/_list.html.erb -->
+<% @flats.each do |flat| %>
+  <h4><%= flat.name %></h4>
+  <p><%= flat.description %></p>
+<% end %>
+
+```
+
+We need to make a ajax call everytime `updateResults` function is called:
 
 ```javascript
 // javascript/controllers/search_controller.js
@@ -204,12 +216,14 @@ We can also put the search results in a partial.
   }
 ```
 
+We need to create route and controller action to receive the ajax call:
+
 ```ruby
   #routes.rb
   post "search_results", to: "flats#search_results"
 ```
 
-
+This controller method will render a js file instead of html. 
 
 ```ruby
 #controllers/flats_controller.rb
@@ -221,19 +235,8 @@ def search_results
 end
 ```
 
-```javascript
-// javascript/controllers/search_controller.js
- updateResults() {
-    const searchInput = this.inputTarget.value
-    $.ajax({
-      url: "/search_results",
-      method: "POST",
-      data: {
-        query:  searchInput
-      }
-    });
-  }
-```
+The final step is to create a javascript view to change the `@flats` value. 
+
 
 ```javascript
 // views/flats/search_results.js.erb
